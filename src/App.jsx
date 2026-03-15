@@ -531,4 +531,4 @@ function GlobalStyles() {
     .glass { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07); backdrop-filter:blur(20px); }
     .hover-scale { transition:transform 0.15s; }
     .hover-scale:hover { transform:scale(1.01); }
-  `}</style>;
+  `}</style>;}
