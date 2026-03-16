@@ -937,3 +937,4 @@ function GlobalStyles() {
     .hover-scale:hover{transform:scale(1.01)}
   `}</style>;
 }
+
