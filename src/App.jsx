@@ -30,8 +30,10 @@ const SERVICIOS = [
 ];
 
 const BONOS = [
-  { id:1, nombre:"Bono 5 Cortes", precio:55, ahorro:10, emoji:"🎟️", color:"#c9a84c" },
-  { id:2, nombre:"Bono 5 Corte+Barba", precio:75, ahorro:10, emoji:"🎟️", color:"#7b9e87" },
+  { id:1, nombre:"Bono 5 Cortes", precio:55, ahorro:10, emoji:"🎟️", color:"#c9a84c", detalle:"5×11€" },
+  { id:2, nombre:"Bono 5 Corte+Cejas", precio:65, ahorro:10, emoji:"🎟️", color:"#e07b54", detalle:"5×13€" },
+  { id:3, nombre:"Bono 5 Corte+Barba", precio:75, ahorro:10, emoji:"🎟️", color:"#7b9e87", detalle:"5×15€" },
+  { id:4, nombre:"Bono 5 Corte Premium", precio:90, ahorro:10, emoji:"🎟️", color:"#5b8dd9", detalle:"5×18€" },
 ];
 
 const HORARIOS_BASE = ["10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30","20:00","20:30","21:00"];
@@ -78,11 +80,7 @@ export default function HorusApp() {
   const [diasBloqueados, setDiasBloqueados] = useState([]);
   const [horariosOcupados, setHorariosOcupados] = useState([]);
   const [tiempoEspera, setTiempoEspera] = useState(0);
-  const [resenas, setResenas] = useState([
-    { id:1, nombre:"Carlos M.", estrellas:5, texto:"El mejor barbero de Alcobendas, sin duda. 10/10.", fecha:"Hace 2 días" },
-    { id:2, nombre:"Javier R.", estrellas:5, texto:"Siempre salgo contento. Muy recomendable.", fecha:"Hace 1 semana" },
-    { id:3, nombre:"Miguel A.", estrellas:4, texto:"Excelente trabajo y muy puntual.", fecha:"Hace 2 semanas" },
-  ]);
+  const [resenas, setResenas] = useState([]);
   const [nuevaResena, setNuevaResena] = useState({ estrellas:5, texto:"" });
   const [notifications, setNotifications] = useState([
     { id:1, title:"¡Bienvenido a Horus Barber! 🎉", body:"Reserva tu primera cita ahora.", time:"ahora", read:false },
@@ -739,6 +737,50 @@ export default function HorusApp() {
                 <div style={{fontSize:10,color:"rgba(240,236,228,0.35)"}}>Horus Barber · Control total</div>
               </div>
               <button onClick={()=>setScreen("perfil")} style={{background:"none",border:"none",color:"rgba(240,236,228,0.35)",cursor:"pointer",fontSize:12}}>← Salir</button>
+            </div>
+
+            {/* Agregar cita manual */}
+            <div className="glass" style={{borderRadius:14,padding:13,marginBottom:12}}>
+              <div style={{fontSize:12,fontWeight:600,marginBottom:9}}>➕ Agregar cita manualmente</div>
+              <div style={{marginBottom:7}}>
+                <div style={{fontSize:10,color:'rgba(240,236,228,0.4)',marginBottom:4}}>Nombre del cliente</div>
+                <input value={adminForm.nombre} onChange={e=>setAdminForm(f=>({...f,nombre:e.target.value}))} placeholder='Nombre del cliente'
+                  style={{width:'100%',background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.09)',borderRadius:9,padding:'9px 11px',color:'#f0ece4',fontSize:12,outline:'none'}}/>
+              </div>
+              <div style={{marginBottom:7}}>
+                <div style={{fontSize:10,color:'rgba(240,236,228,0.4)',marginBottom:4}}>Servicio</div>
+                <select value={adminForm.servicio} onChange={e=>{
+                  const s=SERVICIOS.find(x=>x.nombre===e.target.value);
+                  setAdminForm(f=>({...f,servicio:e.target.value,precio:s?.promo||s?.precio||13}));
+                }} style={{width:'100%',background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.09)',borderRadius:9,padding:'9px 11px',color:'#f0ece4',fontSize:12,outline:'none'}}>
+                  {SERVICIOS.map(s=><option key={s.id} value={s.nombre} style={{background:'#141414'}}>{s.nombre} — {s.promo||s.precio}€</option>)}
+                </select>
+              </div>
+              <div style={{display:'flex',gap:7,marginBottom:7}}>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:10,color:'rgba(240,236,228,0.4)',marginBottom:4}}>Fecha</div>
+                  <input type='date' value={adminForm.fecha} onChange={e=>setAdminForm(f=>({...f,fecha:e.target.value}))}
+                    style={{width:'100%',background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.09)',borderRadius:9,padding:'9px 11px',color:'#f0ece4',fontSize:12,outline:'none',colorScheme:'dark'}}/>
+                </div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:10,color:'rgba(240,236,228,0.4)',marginBottom:4}}>Hora</div>
+                  <select value={adminForm.hora} onChange={e=>setAdminForm(f=>({...f,hora:e.target.value}))}
+                    style={{width:'100%',background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.09)',borderRadius:9,padding:'9px 11px',color:'#f0ece4',fontSize:12,outline:'none'}}>
+                    {HORARIOS_BASE.map(h=><option key={h} value={h} style={{background:'#141414'}}>{h}</option>)}
+                  </select>
+                </div>
+              </div>
+              <button className='btn-gold' onClick={async()=>{
+                if(!adminForm.nombre||!adminForm.fecha){alert('Rellena nombre y fecha.');return;}
+                const nuevaCita={servicio:adminForm.servicio,precio:adminForm.precio,fecha:adminForm.fecha,hora:adminForm.hora,nombre:adminForm.nombre};
+                await db.post('reservas',{...nuevaCita,email:'manual'});
+                setBookings(p=>[...p,nuevaCita]);
+                addNotification('📅 Cita añadida',adminForm.nombre+' · '+adminForm.servicio+' · '+adminForm.fecha+' '+adminForm.hora);
+                setAdminForm({nombre:'',servicio:'Corte',fecha:'',hora:'10:00',precio:13});
+                alert('✅ Cita añadida correctamente');
+              }} style={{width:'100%',padding:'10px',fontSize:12,borderRadius:10}}>
+                ➕ Guardar cita
+              </button>
             </div>
 
             {/* Stats */}
