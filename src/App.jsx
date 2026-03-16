@@ -1,5 +1,34 @@
 import { useState, useRef, useEffect } from "react";
 
+// ─── SUPABASE ────────────────────────────────────────────────────────────────
+const SUPABASE_URL = "https://bbkwbmxaqserojttseaj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Cy-Qi1Jd-EPbC6bRkEPYxg_f0PdFGMy";
+
+const supabase = {
+  async insertReserva(data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/reservas`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+        "Prefer": "return=minimal"
+      },
+      body: JSON.stringify(data)
+    });
+    return res.ok;
+  },
+  async getReservas(email) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/reservas?email=eq.${email}&order=created_at.desc`, {
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    return res.ok ? await res.json() : [];
+  }
+};
+
 const WHATSAPP_NUMBER = "34603768132";
 
 const SERVICIOS = [
@@ -366,14 +395,22 @@ export default function HorusApp() {
             )}
 
             {/* Botón WhatsApp */}
-            <button onClick={()=>{
+            <button onClick={async ()=>{
               if (!selectedServicio) { alert("Elige un servicio primero."); return; }
               if (!selectedFecha) { alert("Elige una fecha."); return; }
               if (!selectedHorario) { alert("Elige un horario."); return; }
               const nombre = user?.name || "Cliente";
+              const email = user?.email || "";
+              await supabase.insertReserva({
+                nombre, email,
+                servicio: selectedServicio.nombre,
+                precio: selectedServicio.precio,
+                fecha: selectedFecha,
+                hora: selectedHorario
+              });
               enviarWhatsApp(selectedServicio.nombre, selectedHorario, selectedFecha, nombre);
               setBookings(prev=>[...prev,{servicio:selectedServicio.nombre,precio:selectedServicio.precio,fecha:selectedFecha,hora:selectedHorario}]);
-              addNotification("📅 Cita solicitada", `${selectedServicio.nombre} el ${selectedFecha} a las ${selectedHorario}. Te confirmamos por WhatsApp.`);
+              addNotification("📅 Cita guardada", `${selectedServicio.nombre} el ${selectedFecha} a las ${selectedHorario}. ¡Confirmada!`);
             }} style={{width:"100%",padding:"16px",fontSize:15,borderRadius:18,background:"linear-gradient(135deg,#25d366,#128c7e)",border:"none",color:"white",cursor:"pointer",fontWeight:700,boxShadow:"0 8px 24px rgba(37,211,102,0.3)"}}>
               💬 Confirmar por WhatsApp
             </button>
