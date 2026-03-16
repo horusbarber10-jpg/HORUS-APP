@@ -118,6 +118,29 @@ export default function HorusApp() {
 
   const addNotification = (title, body) => setNotifications(prev => [{ id:Date.now(), title, body, time:"ahora", read:false }, ...prev]);
 
+  const enviarConfirmacion = (nombre,email,servicio,fecha,hora) => {
+
+  emailjs.send(
+    "service_horus",
+    "template_reserva",
+    {
+      cliente_nombre: nombre,
+      cliente_email: email,
+      servicio: servicio,
+      fecha: fecha,
+      hora: hora
+    },
+    "z4v2fPBwRV8J35TAg"
+  )
+  .then(()=>{
+    console.log("Email enviado");
+  })
+  .catch((error)=>{
+    console.log("Error email",error);
+  });
+
+};
+
   const enviarWhatsApp = (servicio, hora, fecha, nombre) => {
     const msg = `¡Hola Horus! Quiero reservar 💈%0A%0A👤 *${nombre}*%0A✂️ *${servicio}*%0A📅 *${fecha}*%0A🕐 *${hora}*%0A%0A¡Gracias!`;
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, "_blank");
