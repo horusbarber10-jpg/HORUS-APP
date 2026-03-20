@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from “react”;
-import emailjs from “@emailjs/browser”;
 
 const SUPABASE_URL = “https://bbkwbmxaqserojttseaj.supabase.co”;
 const SUPABASE_KEY = “sb_publishable_Cy-Qi1Jd-EPbC6bRkEPYxg_f0PdFGMy”;
@@ -141,44 +140,43 @@ setHorariosOcupados([]);
 const addNotification = (title, body) =>
 setNotifications(prev => [{ id: Date.now(), title, body, time: “ahora”, read: false }, …prev]);
 
-// ── Email de confirmación al CLIENTE ──
+const enviarEmail = (templateId, params) => {
+fetch(“https://api.emailjs.com/api/v1.0/email/send”, {
+method: “POST”,
+headers: { “Content-Type”: “application/json” },
+body: JSON.stringify({
+service_id: EMAILJS_SERVICE,
+template_id: templateId,
+user_id: EMAILJS_PUBLIC_KEY,
+template_params: params,
+}),
+})
+.then(() => console.log(“Email enviado OK”))
+.catch(err => console.error(“Error email:”, err));
+};
+
 const enviarEmailCliente = (nombre, email, servicio, fecha, hora, precio) => {
 if (!email) return;
-emailjs.send(
-EMAILJS_SERVICE,
-EMAILJS_TEMPLATE_CLIENTE,
-{
+enviarEmail(EMAILJS_TEMPLATE_CLIENTE, {
 cliente_nombre: nombre,
-cliente_email:  email,
+cliente_email: email,
 servicio,
 fecha,
 hora,
-precio: precio + “€”,
-},
-EMAILJS_PUBLIC_KEY
-)
-.then(() => console.log(“✅ Email cliente enviado”))
-.catch(err => console.error(“❌ Error email cliente:”, err));
+precio: precio + “euros”,
+});
 };
 
-// ── Email de aviso al BARBERO ──
 const enviarEmailBarbero = (nombre, email, telefono, servicio, fecha, hora, precio) => {
-emailjs.send(
-EMAILJS_SERVICE,
-EMAILJS_TEMPLATE_BARBERO,
-{
-cliente_nombre:   nombre,
-cliente_email:    email    || “No indicado”,
+enviarEmail(EMAILJS_TEMPLATE_BARBERO, {
+cliente_nombre: nombre,
+cliente_email: email || “No indicado”,
 cliente_telefono: telefono || “No indicado”,
 servicio,
 fecha,
 hora,
-precio: precio + “€”,
-},
-EMAILJS_PUBLIC_KEY
-)
-.then(() => console.log(“✅ Email barbero enviado”))
-.catch(err => console.error(“❌ Error email barbero:”, err));
+precio: precio + “euros”,
+});
 };
 
 const enviarWhatsApp = (servicio, hora, fecha, nombre) => {
@@ -1112,3 +1110,4 @@ return <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400
 
 function GlobalStyles() {
 return <style>{`*{box-sizing:border-box;margin:0;padding:0;} ::-webkit-scrollbar{width:0;} @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}} @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}} @keyframes spin{to{transform:rotate(360deg)}} .fade-in{animation:fadeIn 0.3s ease forwards} .btn-gold{background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a0a0a;font-weight:600;border:none;border-radius:14px;cursor:pointer;transition:transform 0.15s,opacity 0.15s} .btn-gold:hover{transform:scale(1.02);opacity:0.95} .glass{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);backdrop-filter:blur(20px)} .hover-scale{transition:transform 0.15s} .hover-scale:hover{transform:scale(1.01)}`}</style>;
+}
