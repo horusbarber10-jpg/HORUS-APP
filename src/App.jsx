@@ -1112,4 +1112,3 @@ return <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400
 
 function GlobalStyles() {
 return <style>{`*{box-sizing:border-box;margin:0;padding:0;} ::-webkit-scrollbar{width:0;} @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}} @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}} @keyframes spin{to{transform:rotate(360deg)}} .fade-in{animation:fadeIn 0.3s ease forwards} .btn-gold{background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a0a0a;font-weight:600;border:none;border-radius:14px;cursor:pointer;transition:transform 0.15s,opacity 0.15s} .btn-gold:hover{transform:scale(1.02);opacity:0.95} .glass{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);backdrop-filter:blur(20px)} .hover-scale{transition:transform 0.15s} .hover-scale:hover{transform:scale(1.01)}`}</style>;
-}
